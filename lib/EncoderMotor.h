@@ -14,7 +14,10 @@ class EncoderMotor{
     public:
         EncoderMotor(int encoderA, int encoderB, int I1, int I2, int PWM);
         void Move(int speedL, int speedR);
-        void ChannelB();
+        static EncoderMotor* instance; // static pointer to the instance
+        static void ISR_ChannelA() { instance->ChannelA(); }
+        static void ISR_ChannelB() { instance->ChannelB(); }
         void ChannelA();
+        void ChannelB();
 
 };

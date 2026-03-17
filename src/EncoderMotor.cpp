@@ -1,21 +1,23 @@
 #include "..\lib\EncoderMotor.h"
 #include <Arduino.h>
+EncoderMotor* EncoderMotor::instance = nullptr;
 
 EncoderMotor::EncoderMotor(int encoderA, int encoderB, int I1, int I2, int PWM){
-    pin_encoderA = encoderA;
-    pin_encoderB = encoderB;
-    pin_I1 = I1;
-    pin_I2 = I2;
-    pin_PWM = PWM;
+  instance = this;  
+  pin_encoderA = encoderA;
+  pin_encoderB = encoderB;
+  pin_I1 = I1;
+  pin_I2 = I2;
+  pin_PWM = PWM;
 
-    pinMode(pin_encoderA, INPUT);
-    pinMode(pin_encoderB, INPUT);
-    pinMode(pin_I1, OUTPUT);
-    pinMode(pin_I2, OUTPUT);
-    pinMode(pin_PWM, OUTPUT);
+  pinMode(pin_encoderA, INPUT);
+  pinMode(pin_encoderB, INPUT);
+  pinMode(pin_I1, OUTPUT);
+  pinMode(pin_I2, OUTPUT);
+  pinMode(pin_PWM, OUTPUT);
 
-  attachInterrupt(digitalPinToInterrupt(pin_encoderA),ChannelA, CHANGE);
-  attachInterrupt(digitalPinToInterrupt(pin_encoderB),ChannelB, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(pin_encoderA), ISR_ChannelA, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(pin_encoderB), ISR_ChannelB, CHANGE);
 }
 
 void EncoderMotor::ChannelA() {
