@@ -16,6 +16,7 @@
 /*                                      Globals                                      */
 /* --------------------------------------------------------------------------------- */
 
+
 // Colour sensor
 int flag=0;
 int counter=0;
@@ -51,7 +52,15 @@ int countR=0,countG=0,countB=0;
 #define PIN_ENC_R_BI2 5
 #define PIN_ENC_R_PWMB 7
 
+// Components
 
+  LED led1(PIN_LED);
+  // IR sensor
+  IRSensor L_IRSensor(PIN_IR_LEFT);
+  IRSensor R_IRSensor(PIN_IR_RIGHT);
+  // Encoder motor
+  EncoderMotor L_EncoderMotor(PIN_ENC_L_A, PIN_ENC_L_B, PIN_ENC_L_AI1, PIN_ENC_L_AI2, PIN_ENC_L_PWMA);
+  EncoderMotor R_EncoderMotor(PIN_ENC_R_A, PIN_ENC_R_B, PIN_ENC_R_BI1, PIN_ENC_R_BI2, PIN_ENC_R_PWMB);
 
 
 /* --------------------------------------------------------------------------------- */
@@ -76,23 +85,11 @@ void ReadDOFSensor();
 void setup() {
 
   /* Initialise the components */
-
-  //  LEDs
-  LED led1 = LED(PIN_LED);
-  // IR sensor
-  IRSensor L_IRSensor = IRSensor(PIN_IR_LEFT);
-  IRSensor R_IRSensor = IRSensor(PIN_IR_RIGHT);
-  // Encoder motor
-  EncoderMotor L_EncoderMotor = EncoderMotor(PIN_ENC_L_A, PIN_ENC_L_B, PIN_ENC_L_AI1, PIN_ENC_L_AI2, PIN_ENC_L_PWMA);
-  EncoderMotor R_EncoderMotor = EncoderMotor(PIN_ENC_R_A, PIN_ENC_R_B, PIN_ENC_R_BI1, PIN_ENC_R_BI2, PIN_ENC_R_PWMB);
-
-
   //  Colour sensor
-  pinMode(PIN_CS_0, OUTPUT);
+  /*pinMode(PIN_CS_0, OUTPUT);
   pinMode(PIN_CS_1, OUTPUT);
   pinMode(PIN_CS_2, OUTPUT);
-  pinMode(PIN_CS_3, OUTPUT);
-
+  pinMode(PIN_CS_3, OUTPUT);*/
   //Serial.begin(9600);
 
 
@@ -100,24 +97,9 @@ void setup() {
 
 /* Loop function (continuous operation) */
 void loop() {
-  /*int IR1 = AverageFilterIRRead(PIN_IR_LEFT);
-  int IR2 = AverageFilterIRRead(PIN_IR_RIGHT);
- 
-  Serial.print("IR1: ");
-  Serial.println(IR1);
-  Serial.print("IR2: ");
-  Serial.println(IR2);
-  delay(1000);*/
-  while(1){
-    digitalWrite(PIN_ENC_L_AI1, 1);
-    digitalWrite(PIN_ENC_L_AI2, 0);
-    analogWrite(PIN_ENC_L_PWMA, 255);
-
-    digitalWrite(PIN_ENC_R_BI1, 1);
-    digitalWrite(PIN_ENC_R_BI2, 0);
-    analogWrite(PIN_ENC_R_PWMB, 255); 
-  }
-
+  // These two go in opposite directions but they're both supposed to be going forward?
+  L_EncoderMotor.Move(100);
+  R_EncoderMotor.Move(100);
 }
 
 

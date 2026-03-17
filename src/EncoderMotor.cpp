@@ -2,7 +2,8 @@
 #include <Arduino.h>
 EncoderMotor* EncoderMotor::instance = nullptr;
 
-EncoderMotor::EncoderMotor(int encoderA, int encoderB, int I1, int I2, int PWM){
+EncoderMotor::EncoderMotor(int encoderA, int encoderB, int I1, int I2, int PWM)
+{
   instance = this;  
   pin_encoderA = encoderA;
   pin_encoderB = encoderB;
@@ -15,17 +16,16 @@ EncoderMotor::EncoderMotor(int encoderA, int encoderB, int I1, int I2, int PWM){
   pinMode(pin_I1, OUTPUT);
   pinMode(pin_I2, OUTPUT);
   pinMode(pin_PWM, OUTPUT);
-
   attachInterrupt(digitalPinToInterrupt(pin_encoderA), ISR_ChannelA, CHANGE);
   attachInterrupt(digitalPinToInterrupt(pin_encoderB), ISR_ChannelB, CHANGE);
 }
 
 void EncoderMotor::ChannelA() {
-// Use if else statements to increment or decrement the encCount variable
-// Use information in the table in the Encoder section of the The Rotary 
-// Position Encoder section of the laboratory Documentation.
-// Focus on the table rows where Output A is changing
-// Use digitalread() to acquire the states of PINA and PINB
+  // Use if else statements to increment or decrement the encCount variable
+  // Use information in the table in the Encoder section of the The Rotary 
+  // Position Encoder section of the laboratory Documentation.
+  // Focus on the table rows where Output A is changing
+  // Use digitalread() to acquire the states of PINA and PINB
 
   int stateA = digitalRead(pin_encoderA); // Read the state of channel A
   int stateB = digitalRead(pin_encoderB); // Read the state of channel B
@@ -55,6 +55,7 @@ void EncoderMotor::ChannelA() {
   //compute the angle of rotation of the wheel using the pulse count, encCount
   wheelAngle = ((float)encCount / ENC_K)*360.0; 
 }
+
 void EncoderMotor::ChannelB(){
   // Use function channelA() as a template
   // This time focus on the rows of the table where Output B is changing
@@ -88,4 +89,27 @@ void EncoderMotor::ChannelB(){
 
   //compute the angle of rotation of the wheel using the pulse count, encCount
   wheelAngle = ((float)encCount / ENC_K)*360.0; 
+}
+
+void EncoderMotor::Move(int speed){
+  // If the speed is negative then go backwards
+  if ( speed < 0 ){
+    digitalWrite(pin_I1, 0);
+    digitalWrite(pin_I2, 1);
+
+    speed = speed * -1; // Make it positive
+  }
+  // If the speed is positive then go forwards
+  else if ( speed > 0 ){
+    digitalWrite(pin_I1, 1);
+    digitalWrite(pin_I2, 0);
+  }
+  // If the speed is zero then brake to make sure it stops
+  else{
+    digitalWrite(pin_I1, 1);
+    digitalWrite(pin_I2, 1);
+  }
+
+  // Write the PWM via. Analog
+  analogWrite(pin_PWM, speed);
 }

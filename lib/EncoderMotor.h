@@ -9,11 +9,11 @@ class EncoderMotor{
         const int ENC_K = 3840;
 
         int wheelAngle;
-        int encCount;
+        long encCount;
 
     public:
         EncoderMotor(int encoderA, int encoderB, int I1, int I2, int PWM);
-        void Move(int speedL, int speedR);
+        void Move(int speed);
         static EncoderMotor* instance; // static pointer to the instance
         static void ISR_ChannelA() { instance->ChannelA(); }
         static void ISR_ChannelB() { instance->ChannelB(); }
