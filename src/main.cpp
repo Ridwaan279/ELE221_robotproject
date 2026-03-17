@@ -10,6 +10,7 @@
 #include <Arduino.h>
 #include "..\lib\LED.h"
 #include "..\lib\IRSensor.h"
+#include "..\lib\EncoderMotor.h"
 
 /* --------------------------------------------------------------------------------- */
 /*                                      Globals                                      */
@@ -23,7 +24,6 @@ int countR=0,countG=0,countB=0;
 //Adafruit_MPU6050 mpu;
 
 /* Constants */
-#define ENC_K 3840 // Number of edges per revolution of shaft (for encoders)
 
 //    ANALOG PINS
 //  IR Sensors
@@ -75,27 +75,23 @@ void ReadDOFSensor();
 /* Setup function (on first boot) */
 void setup() {
 
-  /* Configure PIN modes */
+  /* Initialise the components */
 
   //  LEDs
-  pinMode(PIN_LED, OUTPUT);
+  LED led1 = LED(PIN_LED);
+  // IR sensor
+  IRSensor L_IRSensor = IRSensor(PIN_IR_LEFT);
+  IRSensor R_IRSensor = IRSensor(PIN_IR_RIGHT);
+  // Encoder motor
+  EncoderMotor L_EncoderMotor = EncoderMotor(PIN_ENC_L_A, PIN_ENC_L_B, PIN_ENC_L_AI1, PIN_ENC_L_AI2, PIN_ENC_L_PWMA);
+  EncoderMotor R_EncoderMotor = EncoderMotor(PIN_ENC_R_A, PIN_ENC_R_B, PIN_ENC_R_BI1, PIN_ENC_R_BI2, PIN_ENC_R_PWMB);
+
+
   //  Colour sensor
   pinMode(PIN_CS_0, OUTPUT);
   pinMode(PIN_CS_1, OUTPUT);
   pinMode(PIN_CS_2, OUTPUT);
   pinMode(PIN_CS_3, OUTPUT);
-  // Encoder motor
-  pinMode(PIN_ENC_L_A, INPUT);
-  pinMode(PIN_ENC_L_B, INPUT);
-  pinMode(PIN_ENC_L_AI1, OUTPUT);
-  pinMode(PIN_ENC_L_AI2, OUTPUT);
-  pinMode(PIN_ENC_L_PWMA, OUTPUT);
-
-  pinMode(PIN_ENC_R_A, INPUT);
-  pinMode(PIN_ENC_R_B, INPUT);
-  pinMode(PIN_ENC_R_BI1, OUTPUT);
-  pinMode(PIN_ENC_R_BI2, OUTPUT);
-  pinMode(PIN_ENC_R_PWMB, OUTPUT);
 
   //Serial.begin(9600);
 

@@ -53,7 +53,7 @@ void EncoderMotor::ChannelA() {
   //compute the angle of rotation of the wheel using the pulse count, encCount
   wheelAngle = ((float)encCount / ENC_K)*360.0; 
 }
-void EncoderMotor::ChannelA() {
+void EncoderMotor::ChannelB(){
   // Use function channelA() as a template
   // This time focus on the rows of the table where Output B is changing
   int stateA = digitalRead(pin_encoderA); // Read the state of channel A
