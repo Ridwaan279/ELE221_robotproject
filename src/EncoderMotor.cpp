@@ -2,7 +2,7 @@
 #include <Arduino.h>
 EncoderMotor* EncoderMotor::instance = nullptr;
 
-EncoderMotor::EncoderMotor(int encoderA, int encoderB, int I1, int I2, int PWM)
+EncoderMotor::EncoderMotor(int encoderA, int encoderB, int I1, int I2, int PWM, bool reverse)
 {
   instance = this;  
   pin_encoderA = encoderA;
@@ -10,6 +10,7 @@ EncoderMotor::EncoderMotor(int encoderA, int encoderB, int I1, int I2, int PWM)
   pin_I1 = I1;
   pin_I2 = I2;
   pin_PWM = PWM;
+  reverseDir = reverse;
 
   pinMode(pin_encoderA, INPUT);
   pinMode(pin_encoderB, INPUT);
@@ -94,15 +95,29 @@ void EncoderMotor::ChannelB(){
 void EncoderMotor::Move(int speed){
   // If the speed is negative then go backwards
   if ( speed < 0 ){
-    digitalWrite(pin_I1, 0);
-    digitalWrite(pin_I2, 1);
+    if ( reverseDir == true ){
+      digitalWrite(pin_I1, 1);
+      digitalWrite(pin_I2, 0);
+    }
+    else
+    {
+      digitalWrite(pin_I1, 0);
+      digitalWrite(pin_I2, 1);
+    }
 
     speed = speed * -1; // Make it positive
   }
   // If the speed is positive then go forwards
   else if ( speed > 0 ){
-    digitalWrite(pin_I1, 1);
-    digitalWrite(pin_I2, 0);
+    if ( reverseDir == true ){
+      digitalWrite(pin_I1, 0);
+      digitalWrite(pin_I2, 1);
+    }
+    else
+    {
+      digitalWrite(pin_I1, 1);
+      digitalWrite(pin_I2, 0);
+    }
   }
   // If the speed is zero then brake to make sure it stops
   else{

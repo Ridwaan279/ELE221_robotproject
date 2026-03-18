@@ -11,8 +11,10 @@ class EncoderMotor{
         int wheelAngle;
         long encCount;
 
+        bool reverseDir = false;
+
     public:
-        EncoderMotor(int encoderA, int encoderB, int I1, int I2, int PWM);
+        EncoderMotor(int encoderA, int encoderB, int I1, int I2, int PWM, bool reverse);
         void Move(int speed);
         static EncoderMotor* instance; // static pointer to the instance
         static void ISR_ChannelA() { instance->ChannelA(); }
