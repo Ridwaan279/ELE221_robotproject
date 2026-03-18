@@ -52,20 +52,9 @@
   IRSensor L_IRSensor(PIN_IR_LEFT);
   IRSensor R_IRSensor(PIN_IR_RIGHT);
   // Encoder motor
-  EncoderMotor L_EncoderMotor(PIN_ENC_L_A, PIN_ENC_L_B, PIN_ENC_L_AI1, PIN_ENC_L_AI2, PIN_ENC_L_PWMA);
-  EncoderMotor R_EncoderMotor(PIN_ENC_R_A, PIN_ENC_R_B, PIN_ENC_R_BI1, PIN_ENC_R_BI2, PIN_ENC_R_PWMB);
+  EncoderMotor L_EncoderMotor(PIN_ENC_L_A, PIN_ENC_L_B, PIN_ENC_L_AI1, PIN_ENC_L_AI2, PIN_ENC_L_PWMA, true);
+  EncoderMotor R_EncoderMotor(PIN_ENC_R_A, PIN_ENC_R_B, PIN_ENC_R_BI1, PIN_ENC_R_BI2, PIN_ENC_R_PWMB, false);
 
-
-/* --------------------------------------------------------------------------------- */
-/*                          Function Prototypes                                      */
-/* --------------------------------------------------------------------------------- */
-
-void TCS();
-void ISR_INTO();
-void timer2_init(void);
-void DetectColour();
-void SetupDOFSensor();
-void ReadDOFSensor();
 
 
 /* --------------------------------------------------------------------------------- */
@@ -97,9 +86,6 @@ void loop() {
 
 
 
-/* --------------------------------------------------------------------------------- */
-/*                                      Functions                                    */
-/* --------------------------------------------------------------------------------- */
 
 
 
