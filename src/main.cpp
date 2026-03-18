@@ -83,7 +83,7 @@ void ReadDOFSensor();
 
 /* Setup function (on first boot) */
 void setup() {
-
+ // HELLO WORLD
   /* Initialise the components */
   //  Colour sensor
   /*pinMode(PIN_CS_0, OUTPUT);
@@ -91,7 +91,6 @@ void setup() {
   pinMode(PIN_CS_2, OUTPUT);
   pinMode(PIN_CS_3, OUTPUT);*/
   //Serial.begin(9600);
-
 
 }
 
