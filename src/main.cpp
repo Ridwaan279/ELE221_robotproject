@@ -8,6 +8,7 @@
 #include "..\lib\IRSensor.h"
 #include "..\lib\EncoderMotor.h"
 #include "..\lib\LineFollower.h"
+#include "s..\lib\ServoMotor.h"
 
 /* --------------------------------------------------------------------------------- */
 /*                                      Globals                                      */
