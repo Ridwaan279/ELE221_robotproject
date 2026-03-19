@@ -1,130 +1,124 @@
 #include "..\lib\EncoderMotor.h"
 #include <Arduino.h>
-EncoderMotor* EncoderMotor::instance = nullptr;
-
-EncoderMotor::EncoderMotor(int encoderA, int encoderB, int I1, int I2, int PWM, bool reverse)
+ 
+/* --------------------------------------------------------------------------------- */
+/*                          Static instance initialisation                           */
+/* --------------------------------------------------------------------------------- */
+ 
+EncoderMotor* EncoderMotor::instanceL = nullptr;
+EncoderMotor* EncoderMotor::instanceR = nullptr;
+ 
+/* --------------------------------------------------------------------------------- */
+/*                                   Constructor                                     */
+/* --------------------------------------------------------------------------------- */
+ 
+EncoderMotor::EncoderMotor(int encoderA, int encoderB, int I1, int I2, int PWM, bool isLeft)
 {
-  instance = this;  
   pin_encoderA = encoderA;
   pin_encoderB = encoderB;
-  pin_I1 = I1;
-  pin_I2 = I2;
-  pin_PWM = PWM;
-  reverseDir = reverse;
-
+  pin_I1       = I1;
+  pin_I2       = I2;
+  pin_PWM      = PWM;
+ 
+  encCount   = 0;
+  distance_m = 0.0;
+  iPrev      = 0.0;
+ 
   pinMode(pin_encoderA, INPUT);
   pinMode(pin_encoderB, INPUT);
-  pinMode(pin_I1, OUTPUT);
-  pinMode(pin_I2, OUTPUT);
+  pinMode(pin_I1,  OUTPUT);
+  pinMode(pin_I2,  OUTPUT);
   pinMode(pin_PWM, OUTPUT);
-  attachInterrupt(digitalPinToInterrupt(pin_encoderA), ISR_ChannelA, CHANGE);
-  attachInterrupt(digitalPinToInterrupt(pin_encoderB), ISR_ChannelB, CHANGE);
+ 
+  if (isLeft) {
+    instanceL = this;
+    attachInterrupt(digitalPinToInterrupt(pin_encoderA), ISR_ChannelA_L, CHANGE);
+    attachInterrupt(digitalPinToInterrupt(pin_encoderB), ISR_ChannelB_L, CHANGE);
+  } else {
+    instanceR = this;
+    attachInterrupt(digitalPinToInterrupt(pin_encoderA), ISR_ChannelA_R, CHANGE);
+    attachInterrupt(digitalPinToInterrupt(pin_encoderB), ISR_ChannelB_R, CHANGE);
+  }
 }
-
-void EncoderMotor::ChannelA() {
-  // Use if else statements to increment or decrement the encCount variable
-  // Use information in the table in the Encoder section of the The Rotary 
-  // Position Encoder section of the laboratory Documentation.
-  // Focus on the table rows where Output A is changing
-  // Use digitalread() to acquire the states of PINA and PINB
-
-  int stateA = digitalRead(pin_encoderA); // Read the state of channel A
-  int stateB = digitalRead(pin_encoderB); // Read the state of channel B
-
-  // Check whether channel A has gone HIGH (rising edge)
-  if (stateA == 1) {
-    // When Output A changes from 0→1, use the state of Output B to determine direction
-    if (stateB == 0) {
-      encCount++;  // Encoder rotating in one direction, e.g. clockwise
-    } else {
-      // Encoder rotating in the opposite direction, e.g. counter clockwise
-      encCount--;
-    }
+ 
+/* --------------------------------------------------------------------------------- */
+/*                                 ISR Handlers                                      */
+/* --------------------------------------------------------------------------------- */
+ 
+// Note: local variables named enc_A / enc_B to avoid clashing with AVR register PINB
+void EncoderMotor::channelA() {
+  int enc_A = digitalRead(pin_encoderA);
+  int enc_B = digitalRead(pin_encoderB);
+ 
+  if (enc_A == 1) {
+    if (enc_B == 0) encCount++;
+    else            encCount--;
+  } else {
+    if (enc_B == 1) encCount++;
+    else            encCount--;
   }
-
-  // Otherwise, channel A has gone LOW (falling edge)
-  else {
-    // When Output A changes from 1→0, again use Output B to determine direction
-    if (stateB == 1) {
-      encCount++;  // Encoder rotating in one direction, e.g. clockwise
-    } else {
-      // Encoder rotating in the opposite direction, e.g. counter clockwise
-      encCount--;
-    }
-  }
-
-  //compute the angle of rotation of the wheel using the pulse count, encCount
-  wheelAngle = ((float)encCount / ENC_K)*360.0; 
+  distance_m = ((float)encCount / ENC_K) * 3.1416 * WHEEL_D;
 }
-
-void EncoderMotor::ChannelB(){
-  // Use function channelA() as a template
-  // This time focus on the rows of the table where Output B is changing
-  int stateA = digitalRead(pin_encoderA); // Read the state of channel A
-  int stateB = digitalRead(pin_encoderB); // Read the state of channel B
-
-   // Check whether channel B has gone HIGH (rising edge)
-  if (stateB == 1) {
-    // When Output B changes from 0→1, use the state of Output A to determine direction
-    if (stateA == 1) {
-      encCount++;  // Encoder rotating in one direction, e.g. clockwise
-      //Serial.println("ADDB");
-    } else {
-      // Encoder rotating in the opposite direction, e.g. counter clockwise
-      encCount--;
-      //Serial.println("SUBB");
-    }
+ 
+void EncoderMotor::channelB() {
+  int enc_A = digitalRead(pin_encoderA);
+  int enc_B = digitalRead(pin_encoderB);
+ 
+  if (enc_B == 1) {
+    if (enc_A == 1) encCount++;
+    else            encCount--;
+  } else {
+    if (enc_A == 0) encCount++;
+    else            encCount--;
   }
-
-  // Otherwise, channel B has gone LOW (falling edge)
-  else {
-    // When Output B changes from 1→0, again use Output A to determine direction
-    if (stateA == 0) {
-      encCount++;  // Encoder rotating in one direction, e.g. clockwise
-    } else {
-      // Encoder rotating in the opposite direction, e.g. counter clockwise
-      encCount--;
-    }
-  }
-
-
-  //compute the angle of rotation of the wheel using the pulse count, encCount
-  wheelAngle = ((float)encCount / ENC_K)*360.0; 
+  distance_m = ((float)encCount / ENC_K) * 3.1416 * WHEEL_D;
 }
-
-void EncoderMotor::Move(int speed){
-  // If the speed is negative then go backwards
-  if ( speed < 0 ){
-    if ( reverseDir == true ){
-      digitalWrite(pin_I1, 1);
-      digitalWrite(pin_I2, 0);
-    }
-    else
-    {
-      digitalWrite(pin_I1, 0);
-      digitalWrite(pin_I2, 1);
-    }
-
-    speed = speed * -1; // Make it positive
+ 
+/* --------------------------------------------------------------------------------- */
+/*                                 Public Methods                                    */
+/* --------------------------------------------------------------------------------- */
+ 
+void EncoderMotor::Move(int speed) {
+  if (speed < 0) {
+    digitalWrite(pin_I1, LOW);
+    digitalWrite(pin_I2, HIGH);
+    speed = -speed;
+  } else if (speed > 0) {
+    digitalWrite(pin_I1, HIGH);
+    digitalWrite(pin_I2, LOW);
+  } else {
+    digitalWrite(pin_I1, HIGH);
+    digitalWrite(pin_I2, HIGH);  // Brake
   }
-  // If the speed is positive then go forwards
-  else if ( speed > 0 ){
-    if ( reverseDir == true ){
-      digitalWrite(pin_I1, 0);
-      digitalWrite(pin_I2, 1);
-    }
-    else
-    {
-      digitalWrite(pin_I1, 1);
-      digitalWrite(pin_I2, 0);
-    }
-  }
-  // If the speed is zero then brake to make sure it stops
-  else{
-    digitalWrite(pin_I1, 1);
-    digitalWrite(pin_I2, 1);
-  }
-
-  // Write the PWM via. Analog
   analogWrite(pin_PWM, speed);
+}
+ 
+void EncoderMotor::resetDistance() {
+  encCount   = 0;
+  distance_m = 0.0;
+}
+ 
+float EncoderMotor::getDistance() {
+  return distance_m;
+}
+ 
+float EncoderMotor::getAngle() {
+  return ((float)encCount / ENC_K) * 360.0;
+}
+ 
+int EncoderMotor::piController(float Kp, float Ki, float ref, float feedback, float deltaT) {
+  float error = ref - feedback;
+  float p = error * Kp;
+  float i = iPrev + (error * Ki * deltaT);
+ 
+  if      (i >  255) i =  255;
+  else if (i < -255) i = -255;
+ 
+  float m = p + i;
+ 
+  if      (m >  255) m =  255;
+  else if (m < -255) m = -255;
+ 
+  iPrev = i;
+  return (int)m;
 }

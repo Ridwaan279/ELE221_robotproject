@@ -2,11 +2,7 @@
 /*                                      Libraries                                    */
 /* --------------------------------------------------------------------------------- */
 
-/*
-  No such files? 
-#include <Adafruit_MPU6050.h> ? 
-#include <Adafruit_Sensor.h>
-#include <Wire.h>*/
+
 #include <Arduino.h>
 #include "..\lib\LED.h"
 #include "..\lib\IRSensor.h"
@@ -37,18 +33,19 @@
 //    DIGITAL PINS
 //  LEDs 
 #define PIN_LED 49
-// Encoder Motor
-#define PIN_ENC_L_A 2
-#define PIN_ENC_L_B 3 
-#define PIN_ENC_L_AI1 4
-#define PIN_ENC_L_AI2 8
-#define PIN_ENC_L_PWMA 9 
+// Left motor — encoder on interrupt pins 2 & 3
+#define PIN_ENC_L_A    2
+#define PIN_ENC_L_B    3
+#define PIN_ENC_L_I1   4
+#define PIN_ENC_L_I2   8
+#define PIN_ENC_L_PWM  9
  
-#define PIN_ENC_R_A 19
-#define PIN_ENC_R_B 18
-#define PIN_ENC_R_BI1  6
-#define PIN_ENC_R_BI2 5
-#define PIN_ENC_R_PWMB 7
+// Right motor — encoder on interrupt pins 19 & 18
+#define PIN_ENC_R_A    19
+#define PIN_ENC_R_B    18
+#define PIN_ENC_R_I1   6
+#define PIN_ENC_R_I2   5
+#define PIN_ENC_R_PWM  7
 
 // Components
 
@@ -58,22 +55,16 @@
   IRSensor L_IRSensor(PIN_IR_LEFT);
   IRSensor R_IRSensor(PIN_IR_RIGHT);
   // Encoder motors
-  EncoderMotor L_EncoderMotor(PIN_ENC_L_A, PIN_ENC_L_B, PIN_ENC_L_AI1, PIN_ENC_L_AI2, PIN_ENC_L_PWMA, true);
-  EncoderMotor R_EncoderMotor(PIN_ENC_R_A, PIN_ENC_R_B, PIN_ENC_R_BI1, PIN_ENC_R_BI2, PIN_ENC_R_PWMB, false);
+  EncoderMotor L_Motor(PIN_ENC_L_A, PIN_ENC_L_B, PIN_ENC_L_I1, PIN_ENC_L_I2, PIN_ENC_L_PWM, true);
+  EncoderMotor R_Motor(PIN_ENC_R_A, PIN_ENC_R_B, PIN_ENC_R_I1, PIN_ENC_R_I2, PIN_ENC_R_PWM, false);
   // Line follower
   LineFollower LineFollower1(PIN_LF_L, PIN_LF_C, PIN_LF_R);
 
-/* --------------------------------------------------------------------------------- */
-/*                          Function Prototypes                                      */
-/* --------------------------------------------------------------------------------- */
-
-void TCS();
-void ISR_INTO();
-void timer2_init(void);
-void DetectColour();
-void SetupDOFSensor();
-void ReadDOFSensor();
-
+unsigned long lastDisplay = 0;
+const unsigned long delayDisplay = 250;
+ 
+int stage = 0;
+unsigned long stageStart = 0;
 
 /* --------------------------------------------------------------------------------- */
 /*                                      Setup and Loop                               */
@@ -83,15 +74,10 @@ void ReadDOFSensor();
 
 /* Setup function (on first boot) */
 void setup() {
- // HELLO WORLD
-  /* Initialise the components */
-  //  Colour sensor
-  /*pinMode(PIN_CS_0, OUTPUT);
-  pinMode(PIN_CS_1, OUTPUT);
-  pinMode(PIN_CS_2, OUTPUT);
-  pinMode(PIN_CS_3, OUTPUT);*/
-  Serial.begin(9600);
 
+  Serial.begin(9600);
+  L_Motor.resetDistance();
+  R_Motor.resetDistance();
 }
 
 /* Loop function (continuous operation) */
@@ -100,10 +86,107 @@ void loop() {
   //L_EncoderMotor.Move(100);
   //R_EncoderMotor.Move(100);
 
-  LineFollowerResult result = LineFollower1.Read();
-  int result_ls = L_IRSensor.Read();
-  int result_rs = R_IRSensor.Read();
-  Serial.println(String(result.left) + String(result.centre) + String(result.right) + "\t IR Sensor: L:" + String(result_ls) + " | R:" + String(result_rs));
+  // LineFollowerResult result = LineFollower1.Read();
+  // int result_ls = L_IRSensor.Read();
+  // int result_rs = R_IRSensor.Read();
+  // Serial.println(String(result.left) + String(result.centre) + String(result.right) + "\t IR Sensor: L:" + String(result_ls) + " | R:" + String(result_rs));
+unsigned long now = millis();
+  // Print distance every 250ms
+  if (now - lastDisplay >= delayDisplay) {
+    lastDisplay = now;
+    Serial.print("L Angle (m): ");
+    Serial.print(L_Motor.getAngle());
+    Serial.print("IR sensor");
+    Serial.println(L_IRSensor.AverageRead());
+  }
+ 
+  switch (stage) {
+    case 0:
+      // Turn 360
+      L_Motor.Move(155);
+      R_Motor.Move(155);
+      if (L_Motor.getAngle() >= 600) {
+        L_Motor.Move(0);
+        R_Motor.Move(0);
+        stageStart = now;
+        stage = 1;
+      }
+      break;
+ 
+    case 1:
+      // Wait 1 second then reset and go again
+      if (now - stageStart >= 1000) {
+        L_Motor.resetDistance();
+        R_Motor.resetDistance();
+        stage = 2;
+      }
+      break;
+
+    case 2:
+      // move backwards for a bit
+      L_Motor.Move(155);
+      R_Motor.Move(-155);
+      if (L_Motor.getDistance() >= 0.1) {
+        L_Motor.Move(0);
+        R_Motor.Move(0);
+        stageStart = now;
+        stage = 3;
+      }
+      break;
+
+    case 3:
+      // Wait 1 second then reset and go again
+      if (now - stageStart >= 1000) {
+        L_Motor.resetDistance();
+        R_Motor.resetDistance();
+        stage = 4;
+      }
+      break;
+
+    case 4:
+      // move forward until IR sensors detect something, then stop
+      L_Motor.Move(-155);
+      R_Motor.Move(155);
+      if (L_IRSensor.AverageRead() >= 500 || R_IRSensor.AverageRead() >= 500) {
+        L_Motor.Move(0);
+        R_Motor.Move(0);
+        stageStart = now;
+        stage = 5;
+      }
+      break;
+
+    case 5:
+      // Wait 1 second then reset and go again
+      if (now - stageStart >= 1000) {
+        L_Motor.resetDistance();
+        R_Motor.resetDistance();
+        stage = 6;
+      }
+      break;
+
+    case 6:
+      // Turn 90
+      L_Motor.Move(155);
+      R_Motor.Move(155);
+      if (L_Motor.getAngle() >= 90) {
+        L_Motor.Move(0);
+        R_Motor.Move(0);
+        stageStart = now;
+        stage = 7;
+      }
+      break;
+
+    case 7:
+      // Wait 1 second then reset and go again
+      if (now - stageStart >= 1000) {
+        L_Motor.resetDistance();
+        R_Motor.resetDistance();
+        // stage = 6;
+      }
+      break;
+  }
+
+
 }
 
 
