@@ -1,15 +1,31 @@
 #include "../lib/LED.h"
 #include <Arduino.h>
-
-LED::LED(int PIN)
+ 
+LED::LED(int PIN, unsigned long flashInterval)
 {
-    pin = PIN;
+    pin       = PIN;
+    interval  = flashInterval;
+    lastFlash = 0;
+    state     = false;
     pinMode(pin, OUTPUT);
 }
-
-void LED::FlashLED(){
-  digitalWrite(pin, HIGH);
-  delay(500);
-  digitalWrite(pin, LOW);
-  delay(500);
+ 
+// Call this repeatedly in loop() — it toggles every `interval` ms without blocking
+void LED::FlashLED() {
+    unsigned long now = millis();
+    if (now - lastFlash >= interval) {
+        lastFlash = now;
+        state = !state;
+        digitalWrite(pin, state ? HIGH : LOW);
+    }
+}
+ 
+void LED::On() {
+    state = true;
+    digitalWrite(pin, HIGH);
+}
+ 
+void LED::Off() {
+    state = false;
+    digitalWrite(pin, LOW);
 }

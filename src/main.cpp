@@ -18,12 +18,12 @@
 
 //    ANALOG PINS
 //  IR Sensors
-#define PIN_IR_LEFT 6
-#define PIN_IR_RIGHT 7
+#define PIN_IR_LEFT A6
+#define PIN_IR_RIGHT A7
 // Line Follower 
-#define PIN_LF_L 0
-#define PIN_LF_C 1
-#define PIN_LF_R 2
+#define PIN_LF_L A0
+#define PIN_LF_C A1
+#define PIN_LF_R A2
 //  Colour sensor
 #define PIN_CS_0 15
 #define PIN_CS_1 16
@@ -50,7 +50,7 @@
 // Components
 
   // LED
-  LED led1(PIN_LED);
+  LED led1(PIN_LED, 1000);
   // IR sensors
   IRSensor L_IRSensor(PIN_IR_LEFT);
   IRSensor R_IRSensor(PIN_IR_RIGHT);
@@ -80,6 +80,7 @@ void setup() {
   R_Motor.resetDistance();
 }
 
+
 /* Loop function (continuous operation) */
 void loop() {
   // These two go in opposite directions but they're both supposed to be going forward?
@@ -90,7 +91,7 @@ void loop() {
   // int result_ls = L_IRSensor.Read();
   // int result_rs = R_IRSensor.Read();
   // Serial.println(String(result.left) + String(result.centre) + String(result.right) + "\t IR Sensor: L:" + String(result_ls) + " | R:" + String(result_rs));
-unsigned long now = millis();
+  unsigned long now = millis();
   // Print distance every 250ms
   if (now - lastDisplay >= delayDisplay) {
     lastDisplay = now;
@@ -99,7 +100,8 @@ unsigned long now = millis();
     Serial.print(" IR sensor Left: ");
     Serial.println(L_IRSensor.AverageRead());
   }
- 
+  led1.FlashLED();
+
   switch (stage) {
     case 0:
       // Turn 360
