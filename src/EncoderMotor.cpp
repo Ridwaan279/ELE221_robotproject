@@ -19,6 +19,7 @@ EncoderMotor::EncoderMotor(int encoderA, int encoderB, int I1, int I2, int PWM, 
   pin_I1       = I1;
   pin_I2       = I2;
   pin_PWM      = PWM;
+  reverseDirection = isLeft;
  
   encCount   = 0;
   distance_m = 0.0;
@@ -79,14 +80,35 @@ void EncoderMotor::channelB() {
 /* --------------------------------------------------------------------------------- */
  
 void EncoderMotor::Move(int speed) {
-  if (speed < 0) {
-    digitalWrite(pin_I1, LOW);
-    digitalWrite(pin_I2, HIGH);
+  // If speed is < 0 then reverse direction
+  if (speed < 0) 
+  {
+    if ( reverseDirection == false )
+    {
+      digitalWrite(pin_I1, LOW);
+      digitalWrite(pin_I2, HIGH);
+    }
+    else {
+      digitalWrite(pin_I1, HIGH);
+      digitalWrite(pin_I2, LOW);
+    }
     speed = -speed;
-  } else if (speed > 0) {
-    digitalWrite(pin_I1, HIGH);
-    digitalWrite(pin_I2, LOW);
-  } else {
+  } 
+  // If speed is > 0 then move forward
+  else if (speed > 0) 
+  {
+    if ( reverseDirection == false ){
+      digitalWrite(pin_I1, HIGH);
+      digitalWrite(pin_I2, LOW);
+    }
+    else{
+      digitalWrite(pin_I1, LOW);
+      digitalWrite(pin_I2, HIGH);
+    }
+  } 
+  // If speed = 0, then brake
+  else 
+  {
     digitalWrite(pin_I1, HIGH);
     digitalWrite(pin_I2, HIGH);  // Brake
   }
