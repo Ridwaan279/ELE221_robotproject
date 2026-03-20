@@ -94,18 +94,18 @@ unsigned long now = millis();
   // Print distance every 250ms
   if (now - lastDisplay >= delayDisplay) {
     lastDisplay = now;
-    Serial.print("L Angle (m): ");
-    Serial.print(L_Motor.getAngle());
-    Serial.print("IR sensor");
+    Serial.print("IR sensor Right: ");
+    Serial.print(R_IRSensor.AverageRead());
+    Serial.print(" IR sensor Left: ");
     Serial.println(L_IRSensor.AverageRead());
   }
  
   switch (stage) {
     case 0:
       // Turn 360
-      L_Motor.Move(155);
-      R_Motor.Move(155);
-      if (L_Motor.getAngle() >= 600) {
+      L_Motor.Move(120);
+      R_Motor.Move(120);
+      if (L_Motor.getAngle() >= 800) {
         L_Motor.Move(0);
         R_Motor.Move(0);
         stageStart = now;
@@ -124,9 +124,9 @@ unsigned long now = millis();
 
     case 2:
       // move backwards for a bit
-      L_Motor.Move(155);
-      R_Motor.Move(-155);
-      if (L_Motor.getDistance() >= 0.1) {
+      L_Motor.Move(100);
+      R_Motor.Move(-115);
+      if (L_Motor.getDistance() >= 0.14) {
         L_Motor.Move(0);
         R_Motor.Move(0);
         stageStart = now;
@@ -145,9 +145,9 @@ unsigned long now = millis();
 
     case 4:
       // move forward until IR sensors detect something, then stop
-      L_Motor.Move(-155);
-      R_Motor.Move(155);
-      if (L_IRSensor.AverageRead() >= 500 || R_IRSensor.AverageRead() >= 500) {
+      L_Motor.Move(-90);
+      R_Motor.Move(100);
+      if (L_IRSensor.AverageRead() >= 500 || R_IRSensor.AverageRead() >= 400) {
         L_Motor.Move(0);
         R_Motor.Move(0);
         stageStart = now;
@@ -166,9 +166,9 @@ unsigned long now = millis();
 
     case 6:
       // Turn 90
-      L_Motor.Move(155);
-      R_Motor.Move(155);
-      if (L_Motor.getAngle() >= 90) {
+      L_Motor.Move(120);
+      R_Motor.Move(120);
+      if (L_Motor.getAngle() >= 250) {
         L_Motor.Move(0);
         R_Motor.Move(0);
         stageStart = now;
@@ -185,6 +185,7 @@ unsigned long now = millis();
       }
       break;
   }
+  
 
 
 }
