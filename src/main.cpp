@@ -8,7 +8,7 @@
 #include "..\lib\IRSensor.h"
 #include "..\lib\EncoderMotor.h"
 #include "..\lib\LineFollower.h"
-#include "s..\lib\ServoMotor.h"
+#include "..\lib\ServoMotor.h"
 
 /* --------------------------------------------------------------------------------- */
 /*                                      Globals                                      */
@@ -48,6 +48,13 @@
 #define PIN_ENC_R_I2   5
 #define PIN_ENC_R_PWM  7
 
+// Servo motors
+#define BASE_SERVO 10
+#define JOINT_SERVO 11
+#define GRIPPER_SERVO 12
+
+
+
 // Components
 
   // LED
@@ -60,6 +67,10 @@
   EncoderMotor R_Motor(PIN_ENC_R_A, PIN_ENC_R_B, PIN_ENC_R_I1, PIN_ENC_R_I2, PIN_ENC_R_PWM, false);
   // Line follower
   LineFollower LineFollower1(PIN_LF_L, PIN_LF_C, PIN_LF_R);
+  // Servo motor
+  ServoMotor Servo1(BASE_SERVO);
+  ServoMotor Servo2(JOINT_SERVO);
+  ServoMotor Servo3(GRIPPER_SERVO);
 
 unsigned long lastDisplay = 0;
 const unsigned long delayDisplay = 250;
@@ -84,6 +95,10 @@ void setup() {
 
 /* Loop function (continuous operation) */
 void loop() {
+  Servo3.Detach();
+  Servo2.Detach();
+  Servo1.Detach();
+
   // These two go in opposite directions but they're both supposed to be going forward?
   //L_EncoderMotor.Move(100);
   //R_EncoderMotor.Move(100);
@@ -192,13 +207,3 @@ void loop() {
 
 
 }
-
-
-
-
-/* --------------------------------------------------------------------------------- */
-/*                                      Functions                                    */
-/* --------------------------------------------------------------------------------- */
-
-
-

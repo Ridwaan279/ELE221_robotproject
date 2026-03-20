@@ -8,4 +8,6 @@ class ServoMotor{
     public:
         ServoMotor(int PIN);
         void SetAngle(int degrees);
+        void Attach();    
+        void Detach();    
 };

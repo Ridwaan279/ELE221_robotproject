@@ -1,4 +1,4 @@
-#include "..\lib\ServoMotor.h";
+#include "..\lib\ServoMotor.h"
 #include <Arduino.h>
 
 ServoMotor::ServoMotor(int PIN){
@@ -9,4 +9,12 @@ ServoMotor::ServoMotor(int PIN){
 
 void ServoMotor::SetAngle(int angle){
     servo.write(angle);
+}
+
+void ServoMotor::Attach() {
+    servo.attach(pin);
+}
+
+void ServoMotor::Detach() {
+    servo.detach();
 }
