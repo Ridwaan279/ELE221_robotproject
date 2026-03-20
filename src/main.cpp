@@ -4,6 +4,7 @@
 
 
 #include <Arduino.h>
+#include <math.h>
 #include "..\lib\LED.h"
 #include "..\lib\IRSensor.h"
 #include "..\lib\EncoderMotor.h"
@@ -49,9 +50,9 @@
 #define PIN_ENC_R_PWM  7
 
 // Servo motors
-#define BASE_SERVO 10
-#define JOINT_SERVO 11
-#define GRIPPER_SERVO 12
+#define PIN_BASE_SERVO 10
+#define PIN_JOINT_SERVO 11
+#define PIN_GRIPPER_SERVO 12
 
 
 
@@ -68,9 +69,9 @@
   // Line follower
   LineFollower LineFollower1(PIN_LF_L, PIN_LF_C, PIN_LF_R);
   // Servo motor
-  ServoMotor Servo1(BASE_SERVO);
-  ServoMotor Servo2(JOINT_SERVO);
-  ServoMotor Servo3(GRIPPER_SERVO);
+  ServoMotor BaseServo(PIN_BASE_SERVO);
+  ServoMotor JointServo(PIN_JOINT_SERVO);
+  ServoMotor GripperServo(PIN_GRIPPER_SERVO);
 
 unsigned long lastDisplay = 0;
 const unsigned long delayDisplay = 250;
@@ -94,20 +95,72 @@ void setup() {
 
 
 /* Loop function (continuous operation) */
+int angle = 0;
 void loop() {
-  Servo3.Detach();
-  Servo2.Detach();
-  Servo1.Detach();
+  BaseServo.Detach();
+  JointServo.Detach();
+  GripperServo.Detach();
 
-  // These two go in opposite directions but they're both supposed to be going forward?
-  //L_EncoderMotor.Move(100);
-  //R_EncoderMotor.Move(100);
+  //Serial.println(L_Motor.getAngle());
 
-  // LineFollowerResult result = LineFollower1.Read();
-  // int result_ls = L_IRSensor.Read();
-  // int result_rs = R_IRSensor.Read();
-  // Serial.println(String(result.left) + String(result.centre) + String(result.right) + "\t IR Sensor: L:" + String(result_ls) + " | R:" + String(result_rs));
-  unsigned long now = millis();
+  /*
+  angle += 1;
+  if ( angle < 90 ){
+    BaseServo.SetAngle(angle);
+  }
+  else if ( angle > 90 ) { 
+    BaseServo.SetAngle(180 - angle);
+  }
+  else if ( angle > 180 ){
+    angle = 0;
+  }
+  delay(200);*/
+  
+  //JointServo.SetAngle(0);
+  //GripperServo.SetAngle(0);
+
+
+
+  
+  // Get a read of the line follower
+  LineFollowerResult lfr = LineFollower1.Read();
+  
+  /*Serial.println(String(lfr.left) + ": " + LineFollower1.CheckResultColour(lfr.left) + "\t" + 
+   String(lfr.centre) + ": " + LineFollower1.CheckResultColour(lfr.centre) + "\t" +
+   String(lfr.right) + ": " + LineFollower1.CheckResultColour(lfr.right) + "\t");*/
+
+  if ( L_IRSensor.Read() > 300 || R_IRSensor.Read() > 300 ){
+    L_Motor.Move(-100);
+    L_Motor.Move(-100);
+  }
+  else{
+    // Follow the desired colour (line following)
+    char colourToFollow = 'b';
+    if ( LineFollower1.CheckResultColour(lfr.left) != colourToFollow & LineFollower1.CheckResultColour(lfr.centre) != colourToFollow )
+    {
+      L_Motor.Move(100);
+      R_Motor.Move(50);
+    }
+    else if ( LineFollower1.CheckResultColour(lfr.centre) != colourToFollow && LineFollower1.CheckResultColour(lfr.right) != colourToFollow ){
+      L_Motor.Move(50);
+      R_Motor.Move(100);
+    }
+    else{
+      L_Motor.Move(125);
+      R_Motor.Move(125);
+    }
+  }
+
+  delay(300);
+
+
+  
+  //LineFollowerResult result = LineFollower1.Read();
+  //int result_ls = L_IRSensor.AverageRead();
+  //int result_rs = R_IRSensor.AverageRead();
+  //Serial.println(String(result_ls) + "\t" + String(result_rs) );
+  //Serial.println(String(result.left) + String(result.centre) + String(result.right) + "\t IR Sensor: L:" + String(result_ls) + " | R:" + String(result_rs));
+  /*unsigned long now = millis();
   // Print distance every 250ms
   if (now - lastDisplay >= delayDisplay) {
     lastDisplay = now;
@@ -202,7 +255,7 @@ void loop() {
         // stage = 6;
       }
       break;
-  }
+  }*/
   
 
 
