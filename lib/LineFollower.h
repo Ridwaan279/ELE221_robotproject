@@ -14,5 +14,5 @@ class LineFollower{
         LineFollower(int leftSensorPin, int centreSensorPin, int rightSensorPin);
         LineFollowerResult Read();
         LineFollowerResult AverageRead();
-        bool CheckIsOnColour(LineFollowerResult result, char desiredColour);
+        char CheckResultColour(int result);
 };

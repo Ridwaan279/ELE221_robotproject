@@ -42,24 +42,17 @@ LineFollowerResult LineFollower::AverageRead(){
     return result;
 }
 
-bool LineFollower::CheckIsOnColour(LineFollowerResult result, char desiredColour){ 
-    bool isOnColour = false;
-    switch ( desiredColour ){
-        case 'w':
-            if ( result.left < 100 || result.centre < 100 || result.right < 100 ){
-                isOnColour = true;
-            }
-            break;
-        case 'r':
-            if ( ( result.left > 100 & result.left < 400 ) || ( result.centre > 100 & result.centre < 400 ) || ( result.right > 100 & result.right < 400 )  ){
-                isOnColour = true;
-            }
-            break;
-        case 'b':
-            if ( result.left > 500 || result.centre > 500 || result.right > 500 ){
-                isOnColour = true;
-            }
-            break;
-    } 
-    return isOnColour;
+char LineFollower::CheckResultColour(int result){
+    if ( result < 300 ) {
+        return 'r';
+    }
+    else if ( result > 400 && result < 600 ){
+        return 'w';
+    }
+    else if ( result > 600 ){
+        return 'b';
+    }
+    else{
+        return 'e';
+    }
 }
