@@ -60,25 +60,18 @@
 /*  Y strokes from 0mm (bottom) to +100mm (top) in 51 steps                        */
 /* --------------------------------------------------------------------------------- */
 
-const int IK_STEPS = 51;
+const int IK_STEPS = 20;
+float test1 = 0.77;
+float test2 = 0.63;
 
- 
 const float servo_base[IK_STEPS] = {
-  0.6897, 0.7170, 0.7439, 0.7703, 0.7963, 0.8218, 0.8469, 0.8716, 0.8959, 0.9196,
-  0.9429, 0.9658, 0.9882, 1.0100, 1.0314, 1.0523, 1.0727, 1.0926, 1.1119, 1.1307,
-  1.1489, 1.1666, 1.1837, 1.2003, 1.2163, 1.2317, 1.2465, 1.2607, 1.2742, 1.2872,
-  1.2996, 1.3113, 1.3224, 1.3329, 1.3427, 1.3519, 1.3605, 1.3684, 1.3757, 1.3823,
-  1.3883, 1.3936, 1.3982, 1.4022, 1.4055, 1.4082, 1.4102, 1.4115, 1.4122, 1.4121,
-  1.4114,
+  1.28, 1.1758, 1.0811, 1.0116, 0.9547, 0.9084, 0.8668, 0.8268, 0.7921, 0.7553,
+  0.7147, 0.6926, 0.6711, 0.6595, 0.6489, 0.6432, 0.6453, 0.6568, 0.7021, 0.76,
 };
  
 const float servo_joint[IK_STEPS] = {
-  1.3866, 1.4034, 1.4194, 1.4347, 1.4493, 1.4632, 1.4764, 1.4889, 1.5008, 1.5119,
-  1.5224, 1.5321, 1.5412, 1.5497, 1.5574, 1.5645, 1.5709, 1.5766, 1.5817, 1.5860,
-  1.5897, 1.5928, 1.5951, 1.5968, 1.5978, 1.5982, 1.5978, 1.5968, 1.5951, 1.5928,
-  1.5897, 1.5860, 1.5817, 1.5766, 1.5709, 1.5645, 1.5574, 1.5497, 1.5412, 1.5321,
-  1.5224, 1.5119, 1.5008, 1.4889, 1.4764, 1.4632, 1.4493, 1.4347, 1.4194, 1.4034,
-  1.3866,
+  2.0, 1.8947, 1.7895, 1.6842, 1.5789, 1.4737, 1.3763, 1.2974, 1.2289, 1.1763,
+  1.1237, 1.0711, 1.0184, 0.9658, 0.9132, 0.8605, 0.8079, 0.7553, 0.7026, 0.65,
 };
 
 // Retracted position — physical resting pose of the arm
@@ -134,6 +127,7 @@ void setup() {
   GripperServo.SetAngle(0);
   delay(500);
   GripperServo.Detach();
+  stage = 9;
 
 }
 
@@ -152,7 +146,6 @@ void loop() {
   }
 
   led1.FlashLED();
-
   switch (stage) {
 
     // ---- Stage 0: Attach servos at retracted position, init interpolation ----
@@ -264,8 +257,8 @@ void loop() {
         float t = (float)interpStep / (float)(INTERP_STEPS - 1);
         float b = RETRACTED_BASE  + t * (servo_base[0]  - RETRACTED_BASE);
         float j = RETRACTED_JOINT + t * (servo_joint[0] - RETRACTED_JOINT);
-        BaseServo.SetAngleRad(b);
         JointServo.SetAngleRad(j);
+        BaseServo.SetAngleRad(b);
         interpStep++;
         if (interpStep >= INTERP_STEPS) {
           ikStep     = 0;
@@ -300,9 +293,9 @@ void loop() {
       }
       break;
 
-    // ---- Stage 13: Wait 300ms between each IK step ----
+    // ---- Stage 13: Wait  between each IK step ----
     case 13:
-      if (now - stageStart >= 300) stage = 12;
+      if (now - stageStart >= 2000) stage = 12;
       break;
 
     // ---- Stage 14: Hold at end of stroke for 2s then start return ----
