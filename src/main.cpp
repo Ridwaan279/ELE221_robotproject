@@ -169,7 +169,7 @@ void loop() {
     case 2:
       L_Motor.Move(120);
       R_Motor.Move(120);
-      if (L_Motor.getAngle() >= 810) {
+      if (L_Motor.getAngle() >= 199) {
         L_Motor.Move(0);
         R_Motor.Move(0);
         stageStart = now;
@@ -190,7 +190,7 @@ void loop() {
     case 4:
       L_Motor.Move(100);
       R_Motor.Move(-110);
-      if (L_Motor.getDistance() >= 0.165) {
+      if (L_Motor.getDistance() >= 0.035) {
         L_Motor.Move(0);
         R_Motor.Move(0);
         stageStart = now;
@@ -232,7 +232,7 @@ void loop() {
     case 8:
       L_Motor.Move(120);
       R_Motor.Move(120);
-      if (L_Motor.getAngle() >= 200) {
+      if (L_Motor.getAngle() >= 60) {
         L_Motor.Move(0);
         R_Motor.Move(0);
         stageStart = now;
@@ -368,7 +368,7 @@ void loop() {
     case 18:
       L_Motor.Move(120);
       R_Motor.Move(120);
-      if (L_Motor.getAngle() >= 200) {
+      if (L_Motor.getAngle() >= 50) {
         L_Motor.Move(0);
         R_Motor.Move(0);
         stageStart = now;
@@ -386,7 +386,7 @@ void loop() {
 
     case 20:
       L_Motor.Move(-100);
-      R_Motor.Move(115);
+      R_Motor.Move(108);
       if (L_IRSensor.AverageRead() >= 500 || R_IRSensor.AverageRead() >= 600) {
         L_Motor.Move(0);
         R_Motor.Move(0);
@@ -407,7 +407,7 @@ void loop() {
     case 22:
       L_Motor.Move(120);
       R_Motor.Move(120);
-      if (L_Motor.getAngle() >= 200) {
+      if (L_Motor.getAngle() >= 60) {
         L_Motor.Move(0);
         R_Motor.Move(0);
         stageStart = now;
@@ -427,7 +427,7 @@ void loop() {
     case 24:
       L_Motor.Move(-100);
       R_Motor.Move(110);
-      if (L_Motor.getDistance() <= -0.5) {
+      if (L_Motor.getDistance() <= -0.1) {
         L_Motor.Move(0);
         R_Motor.Move(0);
         stageStart = now;
@@ -438,7 +438,7 @@ void loop() {
     case 25:
       delay(1000);
       GripperServo.Attach();
-      GripperServo.SetAngle(45);
+      GripperServo.SetAngle(180);
       delay(500);
       break;
     
