@@ -43,16 +43,13 @@ LineFollowerResult LineFollower::AverageRead(){
 }
 
 char LineFollower::CheckResultColour(int result){
-    if ( result < 300 ) {
-        return 'r';
+    if (result > 600) {
+        return 'w';   // white — high reflectance
     }
-    else if ( result > 400 && result < 600 ){
-        return 'w';
+    else if (result > 300) {
+        return 'b';   // black — medium/low reflectance
     }
-    else if ( result > 600 ){
-        return 'b';
-    }
-    else{
-        return 'e';
+    else {
+        return 'e';   // error / sensor not reading
     }
 }

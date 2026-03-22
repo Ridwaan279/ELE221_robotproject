@@ -47,6 +47,7 @@
 #define PIN_ENC_R_I2   5
 #define PIN_ENC_R_PWM  7
 
+
 // Servo motors
 #define PIN_BASE_SERVO    10
 #define PIN_JOINT_SERVO   11
@@ -128,6 +129,8 @@ void setup() {
   delay(500);
   GripperServo.Detach();
   stage = 9;
+  L_Motor.Move(0);
+  R_Motor.Move(0);
 
 }
 
@@ -140,9 +143,9 @@ void loop() {
 
   if (now - lastDisplay >= delayDisplay) {
     lastDisplay = now;
-    Serial.print("Stage: "); Serial.print(stage);
-    Serial.print(" | IR R: "); Serial.print(R_IRSensor.AverageRead());
-    Serial.print(" | IR L: "); Serial.println(L_IRSensor.AverageRead());
+    // Serial.print("Stage: "); Serial.print(stage);
+    // Serial.print(" | IR R: "); Serial.print(R_IRSensor.AverageRead());
+    // Serial.print(" | IR L: "); Serial.println(L_IRSensor.AverageRead());
   }
 
   led1.FlashLED();
@@ -236,94 +239,186 @@ void loop() {
         stage = 9;
       }
       break;
+    
+    case 9:{
+      // black line follower
+      LineFollowerResult lfr = LineFollower1.Read();
+      
+      if (lfr.left > 500 && lfr.centre > 350 && lfr.right > 500){
+        L_Motor.Move(-70);
+        R_Motor.Move(80);
+      }
+      else if (lfr.left > 500 && lfr.centre > 350 ){
+        L_Motor.Move(-70);
+        R_Motor.Move(80);
+      } 
+      else if (lfr.centre > 350 && lfr.right > 500){
+        L_Motor.Move(-70);
+        R_Motor.Move(80);
+      }
+      else if (lfr.left > 500){
+        L_Motor.Move(40);
+        R_Motor.Move(40);
+      }
+      else if (lfr.right > 500){
+        L_Motor.Move(-40);
+        R_Motor.Move(-40);
+      }
+      else{
+        L_Motor.Move(40);
+        R_Motor.Move(0);
+      }
 
-    // ---- Stage 9: Wait 1s then attach servos ----
-    case 9:
-      if (now - stageStart >= 1000) {
-        L_Motor.resetDistance();
-        R_Motor.resetDistance();
-        interpStep = 0;
-        BaseServo.Attach();
-        JointServo.Attach();
+      if (L_IRSensor.AverageRead() >= 500 || R_IRSensor.AverageRead() >= 400) {
+        L_Motor.Move(0);
+        R_Motor.Move(0);
         stageStart = now;
         stage = 10;
       }
       break;
+    }
+    case 10:
+      if (now - stageStart >= 1000) {
+        L_Motor.resetDistance();
+        R_Motor.resetDistance();
+        stage = 11;
+      }
+      break;
+
+    case 11:
+      L_Motor.Move(120);
+      R_Motor.Move(120);
+      if (L_Motor.getAngle() >= 200) {
+        L_Motor.Move(0);
+        R_Motor.Move(0);
+        stageStart = now;
+        stage = 12;
+      }
+      break;
+
+    case 12:{
+      //red line follower
+      LineFollowerResult lfr = LineFollower1.Read();
+      if (lfr.left > 400 && lfr.centre > 250 && lfr.right > 400){
+        L_Motor.Move(-70);
+        R_Motor.Move(80);
+      }
+      else if (lfr.left > 400 && lfr.centre > 250 ){
+        L_Motor.Move(-70);
+        R_Motor.Move(80);
+      } 
+      else if (lfr.centre > 250 && lfr.right > 400){
+        L_Motor.Move(-70);
+        R_Motor.Move(80);
+      }
+      else if (lfr.left > 400){
+        L_Motor.Move(40);
+        R_Motor.Move(40);
+      }
+      else if (lfr.right > 400){
+        L_Motor.Move(-40);
+        R_Motor.Move(-40);
+      }
+      else{
+        L_Motor.Move(40);
+        R_Motor.Move(0);
+      }
+
+      if (L_IRSensor.AverageRead() >= 500 || R_IRSensor.AverageRead() >= 400) {
+        L_Motor.Move(0);
+        R_Motor.Move(0);
+        stageStart = now;
+        stage = 16;
+      }
+      break;
+    }
+    // ---- Stage 9: Wait 1s then attach servos ----
+    // case 9:
+    //   if (now - stageStart >= 1000) {
+    //     L_Motor.resetDistance();
+    //     R_Motor.resetDistance();
+    //     interpStep = 0;
+    //     BaseServo.Attach();
+    //     JointServo.Attach();
+    //     stageStart = now;
+    //     stage = 10;
+    //   }
+    //   break;
 
     // ---- Stage 10: Slowly interpolate from retracted pos to IK start (step 0) ----
-    case 10:
-      if (now - stageStart >= INTERP_DELAY_MS) {
-        stageStart = now;
-        float t = (float)interpStep / (float)(INTERP_STEPS - 1);
-        float b = RETRACTED_BASE  + t * (servo_base[0]  - RETRACTED_BASE);
-        float j = RETRACTED_JOINT + t * (servo_joint[0] - RETRACTED_JOINT);
-        JointServo.SetAngleRad(j);
-        BaseServo.SetAngleRad(b);
-        interpStep++;
-        if (interpStep >= INTERP_STEPS) {
-          ikStep     = 0;
-          stageStart = now;
-          stage      = 11;
-        }
-      }
-      break;
+    // case 10:
+    //   if (now - stageStart >= INTERP_DELAY_MS) {
+    //     stageStart = now;
+    //     float t = (float)interpStep / (float)(INTERP_STEPS - 1);
+    //     float b = RETRACTED_BASE  + t * (servo_base[0]  - RETRACTED_BASE);
+    //     float j = RETRACTED_JOINT + t * (servo_joint[0] - RETRACTED_JOINT);
+    //     JointServo.SetAngleRad(j);
+    //     BaseServo.SetAngleRad(b);
+    //     interpStep++;
+    //     if (interpStep >= INTERP_STEPS) {
+    //       ikStep     = 0;
+    //       stageStart = now;
+    //       stage      = 11;
+    //     }
+    //   }
+    //   break;
 
-    // ---- Stage 11: Wait 1s at start position before drawing ----
-    case 11:
-      if (now - stageStart >= 1000) stage = 12;
-      break;
+    // // ---- Stage 11: Wait 1s at start position before drawing ----
+    // case 11:
+    //   if (now - stageStart >= 1000) stage = 12;
+    //   break;
 
-    // ---- Stage 12: Step through vertical stroke ----
-    case 12:
-      if (ikStep < IK_STEPS) {
-        BaseServo.SetAngleRad(servo_base[ikStep]);
-        JointServo.SetAngleRad(servo_joint[ikStep]);
+    // // ---- Stage 12: Step through vertical stroke ----
+    // case 12:
+    //   if (ikStep < IK_STEPS) {
+    //     BaseServo.SetAngleRad(servo_base[ikStep]);
+    //     JointServo.SetAngleRad(servo_joint[ikStep]);
 
-        Serial.print("Step "); Serial.print(ikStep);
-        Serial.print(" | Base: ");  Serial.print(servo_base[ikStep]);
-        Serial.print(" rad | Joint: "); Serial.print(servo_joint[ikStep]);
-        Serial.println(" rad");
+    //     Serial.print("Step "); Serial.print(ikStep);
+    //     Serial.print(" | Base: ");  Serial.print(servo_base[ikStep]);
+    //     Serial.print(" rad | Joint: "); Serial.print(servo_joint[ikStep]);
+    //     Serial.println(" rad");
 
-        ikStep++;
-        stageStart = now;
-        stage = 13;
-      } else {
-        stageStart = now;
-        stage = 14;
-      }
-      break;
+    //     ikStep++;
+    //     stageStart = now;
+    //     stage = 13;
+    //   } else {
+    //     stageStart = now;
+    //     stage = 14;
+    //   }
+    //   break;
 
-    // ---- Stage 13: Wait  between each IK step ----
-    case 13:
-      if (now - stageStart >= 2000) stage = 12;
-      break;
+    // // ---- Stage 13: Wait  between each IK step ----
+    // case 13:
+    //   if (now - stageStart >= 2000) stage = 12;
+    //   break;
 
-    // ---- Stage 14: Hold at end of stroke for 2s then start return ----
-    case 14:
-      if (now - stageStart >= 2000) {
-        interpStep = 0;
-        stageStart = now;
-        stage = 15;
-      }
-      break;
+    // // ---- Stage 14: Hold at end of stroke for 2s then start return ----
+    // case 14:
+    //   if (now - stageStart >= 2000) {
+    //     interpStep = 0;
+    //     stageStart = now;
+    //     stage = 15;
+    //   }
+    //   break;
 
-    // ---- Stage 15: Slowly interpolate from IK end (step 0) back to retracted pos ----
-    case 15:
-      if (now - stageStart >= INTERP_DELAY_MS) {
-        stageStart = now;
-        float t = (float)interpStep / (float)(INTERP_STEPS - 1);
-        float b = servo_base[0]  + t * (RETRACTED_BASE  - servo_base[0]);
-        float j = servo_joint[0] + t * (RETRACTED_JOINT - servo_joint[0]);
-        BaseServo.SetAngleRad(b);
-        JointServo.SetAngleRad(j);
-        interpStep++;
-        if (interpStep >= INTERP_STEPS) {
-          BaseServo.Detach();
-          JointServo.Detach();
-          stage = 16;
-        }
-      }
-      break;
+    // // ---- Stage 15: Slowly interpolate from IK end (step 0) back to retracted pos ----
+    // case 15:
+    //   if (now - stageStart >= INTERP_DELAY_MS) {
+    //     stageStart = now;
+    //     float t = (float)interpStep / (float)(INTERP_STEPS - 1);
+    //     float b = servo_base[0]  + t * (RETRACTED_BASE  - servo_base[0]);
+    //     float j = servo_joint[0] + t * (RETRACTED_JOINT - servo_joint[0]);
+    //     BaseServo.SetAngleRad(b);
+    //     JointServo.SetAngleRad(j);
+    //     interpStep++;
+    //     if (interpStep >= INTERP_STEPS) {
+    //       BaseServo.Detach();
+    //       JointServo.Detach();
+    //       stage = 16;
+    //     }
+    //   }
+    //   break;
 
     // ---- Stage 16: Done — arm is back at retracted position ----
     case 16:
