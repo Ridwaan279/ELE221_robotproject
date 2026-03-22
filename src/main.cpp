@@ -69,9 +69,9 @@
   // Line follower
   LineFollower LineFollower1(PIN_LF_L, PIN_LF_C, PIN_LF_R);
   // Servo motor
-  ServoMotor BaseServo(PIN_BASE_SERVO);
-  ServoMotor JointServo(PIN_JOINT_SERVO);
-  ServoMotor GripperServo(PIN_GRIPPER_SERVO);
+  ServoMotor BaseServo(PIN_BASE_SERVO, 800);
+  ServoMotor JointServo(PIN_JOINT_SERVO, 600);
+  ServoMotor GripperServo(PIN_GRIPPER_SERVO, 1000);
 
 unsigned long lastDisplay = 0;
 const unsigned long delayDisplay = 250;
