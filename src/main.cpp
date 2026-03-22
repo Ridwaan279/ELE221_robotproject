@@ -61,18 +61,18 @@
 /*  Y strokes from 0mm (bottom) to +100mm (top) in 51 steps                        */
 /* --------------------------------------------------------------------------------- */
 
-const int IK_STEPS = 20;
+const int IK_STEPS = 18;
 float test1 = 0.77;
 float test2 = 0.63;
 
 const float servo_base[IK_STEPS] = {
   1.28, 1.1758, 1.0811, 1.0116, 0.9547, 0.9084, 0.8668, 0.8268, 0.7921, 0.7553,
-  0.7147, 0.6926, 0.6711, 0.6595, 0.6489, 0.6432, 0.6453, 0.6568, 0.7021, 0.76,
+  0.7147, 0.6926, 0.6711, 0.6595, 0.6489, 0.6432, 0.6453, 0.6568, 
 };
  
 const float servo_joint[IK_STEPS] = {
   2.0, 1.8947, 1.7895, 1.6842, 1.5789, 1.4737, 1.3763, 1.2974, 1.2289, 1.1763,
-  1.1237, 1.0711, 1.0184, 0.9658, 0.9132, 0.8605, 0.8079, 0.7553, 0.7026, 0.65,
+  1.1237, 1.0711, 1.0184, 0.9658, 0.9132, 0.8605, 0.8079, 0.7553, 
 };
 
 // Retracted position — physical resting pose of the arm
@@ -169,7 +169,7 @@ void loop() {
     case 2:
       L_Motor.Move(120);
       R_Motor.Move(120);
-      if (L_Motor.getAngle() >= 199) {
+      if (L_Motor.getAngle() >= 200) {
         L_Motor.Move(0);
         R_Motor.Move(0);
         stageStart = now;
@@ -407,7 +407,7 @@ void loop() {
     case 22:
       L_Motor.Move(120);
       R_Motor.Move(120);
-      if (L_Motor.getAngle() >= 60) {
+      if (L_Motor.getAngle() >= 65) {
         L_Motor.Move(0);
         R_Motor.Move(0);
         stageStart = now;
@@ -427,7 +427,7 @@ void loop() {
     case 24:
       L_Motor.Move(-100);
       R_Motor.Move(110);
-      if (L_Motor.getDistance() <= -0.1) {
+      if (L_Motor.getDistance() <= -0.15) {
         L_Motor.Move(0);
         R_Motor.Move(0);
         stageStart = now;
