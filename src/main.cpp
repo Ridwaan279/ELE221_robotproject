@@ -243,7 +243,7 @@ void loop() {
     case 9:{
       // black line follower
       LineFollowerResult lfr = LineFollower1.Read();
-      
+
       if (lfr.left > 500 && lfr.centre > 350 && lfr.right > 500){
         L_Motor.Move(-70);
         R_Motor.Move(80);
@@ -296,31 +296,49 @@ void loop() {
       }
       break;
 
-    case 12:{
+    case 12:
+      if (now - stageStart >= 1000) {
+        L_Motor.resetDistance();
+        R_Motor.resetDistance();
+        stage = 13;
+      }
+      break;
+
+    case 13:
+      L_Motor.Move(-100);
+      R_Motor.Move(100);
+      if (now - stageStart >= 3000) {
+        L_Motor.Move(0);
+        R_Motor.Move(0);
+        stageStart = now;
+        stage = 14;
+      }
+      break;
+    case 14:{
       //red line follower
       LineFollowerResult lfr = LineFollower1.Read();
-      if (lfr.left > 400 && lfr.centre > 250 && lfr.right > 400){
+      if (lfr.left > 450 && lfr.centre > 300 && lfr.right > 450){
         L_Motor.Move(-70);
         R_Motor.Move(80);
       }
-      else if (lfr.left > 400 && lfr.centre > 250 ){
+      else if (lfr.left > 450 && lfr.centre > 300 ){
         L_Motor.Move(-70);
         R_Motor.Move(80);
       } 
-      else if (lfr.centre > 250 && lfr.right > 400){
+      else if (lfr.centre > 300 && lfr.right > 450){
         L_Motor.Move(-70);
         R_Motor.Move(80);
       }
-      else if (lfr.left > 400){
+      else if (lfr.left > 450){
         L_Motor.Move(40);
         R_Motor.Move(40);
       }
-      else if (lfr.right > 400){
+      else if (lfr.right > 450){
         L_Motor.Move(-40);
         R_Motor.Move(-40);
       }
       else{
-        L_Motor.Move(40);
+        L_Motor.Move(-40);
         R_Motor.Move(0);
       }
 
