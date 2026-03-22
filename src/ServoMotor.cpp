@@ -4,8 +4,8 @@
 ServoMotor::ServoMotor(int PIN, int refPulse) {
     pin           = PIN;
     refPulseWidth = refPulse;  
-    servo.attach(pin);
-    pinMode(pin, OUTPUT);
+    // servo.attach(pin);
+    // pinMode(pin, OUTPUT);
 }
 
 void ServoMotor::SetAngle(int angle){
